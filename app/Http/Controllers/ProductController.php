@@ -3,42 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Api\Product\CreateRequest;
-use App\Http\Requests\Api\Product\UpdateRequest;
+use App\Http\Requests\Web\Product\UpdateProductRequest;
+use App\Http\Requests\Web\Product\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     protected $productService;
+    protected $categoryService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(
+        ProductService $productService,
+        CategoryService $categoryService)
     {
         $this->productService = $productService;
+        $this->categoryService = $categoryService;
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $result = $this->productService->getList();
-
-        return ProductResource::apiPaginate($result, $request);
+        $products = $this->productService->getList();
+        return view('products.list', ['items' => $products]);
     }
 
-    public function store(CreateRequest $createRequest)
+    public function create() {
+        $categories = $this->categoryService->getList();
+        return view('products.create', ['categories' => $categories]);
+    }
+
+    public function edit(Product $product) {
+        $categories = $this->categoryService->getList();
+
+        return view('products.edit', [
+            'product' => $product,
+            'categories' => $categories
+        ]);
+    }
+
+    public function store(StoreProductRequest $request)
     {
-        $requests = $createRequest->validated();
-
-        $result = $this->productService->create($requests);
-
-        if ($result) {
-            // return new ProductResource($result);
-            return response()->api_success("Created product success", $result);
+        $data = $request->validated();
+        
+        if ($this->productService->create($data)) {
+            return redirect()->route('products.index')
+                ->with('success', 'Product created successfully');
         }
 
-        return response()->json([
-            'msg' => 'them moi loi'
-        ]);
+        return redirect()->route('products.index')
+            ->with('error', 'Failed to create product');
     }
 
     public function show(Product $product)
@@ -46,21 +62,17 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    public function update(Product $product, UpdateRequest $updateRequest)
+    public function update(Product $product, UpdateProductRequest $request)
     {
-        $request = $updateRequest->validated();
-
-        $result = $this->productService->update($product, $request);
-
-        if ($result) {
-            return response()->json([
-                'msg' => 'Cap nhat thanh cong'
-            ]);
+        $data = $request->validated();
+        
+        if ($this->productService->update($product, $data)) {
+            return redirect()->route('products.index')
+                ->with('success', 'Product updated successfully');
         }
 
-        return response()->json([
-            'msg' => 'cap nhat loi'
-        ]);
+        return redirect()->route('products.index')
+            ->with('error', 'Failed to update product');
     }
 
     public function destroy(Product $product)

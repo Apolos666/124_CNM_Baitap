@@ -4,7 +4,7 @@ namespace App\Http\Requests\Web\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends FormRequest
+class CategoryStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,15 +24,16 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'=> ['required', 'max:255'],
+            'name' => ['required', 'max:255'],
             'description' => ['required'],
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
-            'name.required'=> 'Ban hay nhap name',
+            'name.required' => 'Vui lòng nhập tên danh mục',
+            'name.max' => 'Tên danh mục tối đa 255 ký tự',
+            'description.required' => 'Vui lòng nhập mô tả danh mục',
         ];
     }
 }

@@ -1,5 +1,5 @@
 
-<h1>Categories</h1>
+<h1>Products</h1>
 @if (session('success'))
     <p>{{ session('success') }}</p>
 @endif
@@ -8,28 +8,43 @@
     <p>{{ session('error') }}</p>
 @endif
 
-<a class="create-button" href="{{ route('categories.create') }}" type='button'>Create category</a>
+<a class="create-button" href="{{ route('products.create') }}" type='button'>Create product</a>
+
 
 <table>
     <tr>
       <th>Name</th>
-      <th>Description</th>
-      <th>Action</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Status</th>
+      <th></th>
 
     </tr>
-    @foreach ($items as $category)
+    @foreach ($items as $product)
     <tr>
       <td>
-        <a href="{{ route('categories.show', $category->id) }}">{{ $category->name }}
+        <a href="/">
+          {{$product->name}}
         </a>
       </td>
-      <td>{{ $category->description }}</td>
       <td>
-        <a href="{{ route('categories.edit', $category->id) }}">
-          Edit
-        </a>
+        {{ $product->category->name }}
       </td>
-
+      <td>
+        {{ $product->price }}
+      </td>
+      <td>
+        @if($product->status == 0)
+            Hết hàng
+        @elseif($product->status == 1)
+            Còn hàng
+        @else
+            Unknown Status
+        @endif
+    </td>
+      <td>
+        <a href="{{ route('products.edit', $product->id) }}">Edit</a>
+      </td>
     </tr>
     @endforeach
   </table>

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Web\Category\UpdateRequest;
+use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Services\CategoryService;
-use Illuminate\Http\Request;
+use App\Http\Requests\Web\Category\UpdateRequest;
+use App\Http\Requests\Web\Category\CategoryStoreRequest;
 
 class CategoryController extends Controller
 {
@@ -14,6 +15,7 @@ class CategoryController extends Controller
     {
         $this->categoryService = $categoryService;
     }
+
     public function index()
     {
         $categories = $this->categoryService->getList();
@@ -26,16 +28,33 @@ class CategoryController extends Controller
         return view('categories.edit', ['category' => $category]);
     }
 
+    public function create() {
+        return view('categories.create');
+    }
+
+    public function store(CategoryStoreRequest $request) {
+        $data = $request->validated();
+        
+        if ($this->categoryService->create($data)) {
+            return redirect()->route('categories.index')
+                ->with('success', 'Category created successfully');
+        }
+        
+        return redirect()->route('categories.index')
+            ->with('error', 'Failed to create category');
+    }
+
     public function update(UpdateRequest $request, Category $category)
     {
-        $request = $request->validated();
-        $result = $this->categoryService->update($category, $request);
+        $data = $request->validated();
         
-        if ($result) {
-            return redirect()->route('categories.index')->with('success', 'Updated success');
+        if ($this->categoryService->update($category, $data)) {
+            return redirect()->route('categories.index')
+                ->with('success', 'Updated successfully');
         }
 
-        return redirect()->route('categories.index')->with('error', 'Updated fail');
+        return redirect()->route('categories.index')
+            ->with('error', 'Update failed');
     }
 
     public function show(Category $category)

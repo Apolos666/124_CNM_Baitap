@@ -14,29 +14,30 @@ class ProductService {
         $this->model = $product;
     }
 
-    public function create($params)
+    public function create($data)
     {
         try {
-            $params['status'] = 1;
-
-            return $this->model->create($params);
+            return $this->model->create($data);
         } catch (Exception $exception) {
-            Log::error($exception);
-            
+            Log::error('Error creating product: ' . $exception->getMessage());
             return false;
         }
     }
 
-    public function update($product, $param)
+    public function update($product, $data)
     {
-        $param['status'] = 0;
-        return $product->update($param);
+        try {
+            return $product->update($data);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
     }
 
     public function getList()
     {
-        return $this->model
-            ->where('status', 1)
-            ->orderBy('created_at', 'DESC');
+        return $this->model::with('category')
+            ->orderBy('id','desc')
+            ->get();
     }
 }
